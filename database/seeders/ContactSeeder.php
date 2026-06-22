@@ -21,9 +21,8 @@ class ContactSeeder extends Seeder
 
         Contact::factory()
             ->count(20)
-            ->create()
+            ->create(['category_id' => fn() => $categories->random()->id,])
             ->each(function ($contact) use ($categories, $tags) {
-                $contact->update(['category_id' => $categories->random()->id]);
                 $contact->tags()->attach($tags->random(rand(1, 3))->pluck('id')->toArray());
             });
     }
