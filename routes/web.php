@@ -22,4 +22,6 @@ Route::get('/thanks', [ContactController::class, 'thanks']);
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+    Route::get('/admin/contacts/{contact}', [AdminController::class, 'show']);
+    Route::delete('/admin/contacts/{contact}', [AdminController::class, 'destroy']);
 });
