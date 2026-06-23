@@ -44,4 +44,25 @@ class PageAccessTest extends TestCase
         // Assert
         $response->assertOk();
     }
+
+    public function test_admin_page_is_accessible_on_login(): void
+    {
+        // Arrange
+        $user = \App\Models\User::factory()->create();
+
+        // Act
+        $response = $this->actingAs($user)->get('/admin');
+
+        // Assert
+        $response->assertOk();
+    }
+
+    public function test_admin_page_is_not_accessible_without_login(): void
+    {
+        // Act
+        $response = $this->get('/admin');
+
+        // Assert
+        $response->assertRedirect('/login');
+    }
 }
