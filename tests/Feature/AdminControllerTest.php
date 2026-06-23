@@ -104,4 +104,35 @@ class AdminControllerTest extends TestCase
         $response->assertDontSee('unmatched-category@example.com');
         $response->assertDontSee('unmatched-date@example.com');
     }
+
+    # GET /admin/contacts/{contact} で指定したお問い合わせがカテゴリ情報付きで詳細ページに表示される
+    public function test_admin_can_view_contact_detail_with_category(): void
+    {
+        // Arrange
+        $category = Category::factory()->create();
+        $contact = Contact::factory()->create(['category_id' => $category->id]);
+
+        // Act
+        $response = $this->get('/admin/contacts/' . $contact->id);
+
+        // Assert
+        $response->assertOk();
+        $response->assertSee($category->name);
+    }
+
+    # DELETE /admin/contacts/{contact} でレコードが正常に削除され、/admin にリダイレクトされる
+    public function test_contact_is_deleted_and_is_redirects_to_admin_page(): void
+    {
+        // Arange
+        $contact = Contact::factory()->create();
+
+        // Act
+        $response = $this->delete('/admin/contacts/' . $contact->id);
+
+        //Assert
+        $this->assertDatabaseMissing('contacts', ['id' => $contact->id]);
+        $this->assertDatabaseMissing('contact_tag', ['contact_id' => $contact->id]);
+
+        $response->assertRedirect(route('admin'));
+    }
 }
