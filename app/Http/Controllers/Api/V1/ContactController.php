@@ -76,14 +76,7 @@ class ContactController extends Controller
      */
     public function show(string $id)
     {
-        $contact = Contact::find($id);
-
-        if (! $contact) {
-            return response()->json([
-                'error' => 'お問い合わせが見つかりませんでした。',
-            ], 404);
-        }
-
+        $contact = Contact::findOrFail($id);
         $contact->load(['category', 'tags']);
 
         return (new ContactResource($contact))->response()->setStatusCode(200);
@@ -94,13 +87,7 @@ class ContactController extends Controller
      */
     public function update(UpdateContactRequest $request, string $id)
     {
-        $contact = Contact::find($id);
-
-        if (! $contact) {
-            return response()->json([
-                'error' => 'お問い合わせが見つかりませんでした。',
-            ], 404);
-        }
+        $contact = Contact::findOrFail($id);
 
         $validated = $request->validated();
         $tagIds = $validated['tag_ids'] ?? [];
@@ -117,14 +104,7 @@ class ContactController extends Controller
      */
     public function destroy(string $id)
     {
-        $contact = Contact::find($id);
-
-        if (! $contact) {
-            return response()->json([
-                'error' => 'お問い合わせが見つかりませんでした。',
-            ], 404);
-        }
-
+        $contact = Contact::findOrFail($id);
         $contact->delete();
 
         return response()->noContent();

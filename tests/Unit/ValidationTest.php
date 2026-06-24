@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use App\Http\Requests\ExportContactRequest;
 use App\Http\Requests\IndexContactRequest;
 use App\Http\Requests\StoreContactRequest;
-use App\Http\Requests\StoretagRequest;
+use App\Http\Requests\StoreTagRequest;
 use App\Http\Requests\UpdateTagRequest;
 use App\Models\Category;
 use App\Models\Tag;
@@ -41,7 +41,7 @@ class ValidationTest extends TestCase
 
     private function store_tag_validate(array $data, ?Tag $tag = null)
     {
-        $requestClass = $tag ? UpdateTagRequest::class : StoretagRequest::class;
+        $requestClass = $tag ? UpdateTagRequest::class : StoreTagRequest::class;
         $request = $requestClass::create(
             $tag ? "/admin/tags/{$tag->id}" : '/admin/tags',
             $tag ? 'PUT' : 'POST',
@@ -54,7 +54,7 @@ class ValidationTest extends TestCase
             $route->bind($request);
             $route->setParameter('tag', $tag->id);
 
-            $request->setRouteResolver(fn () => $route);
+            $request->setRouteResolver(fn() => $route);
         }
 
         return Validator::make($data, $request->rules());

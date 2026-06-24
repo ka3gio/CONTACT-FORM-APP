@@ -1,43 +1,20 @@
-# お問い合わせフォーム
+# COACHTECH お問い合わせフォーム
 
-Laravel 10で構築したお問い合わせ管理アプリケーションです。一般ユーザーはお問い合わせを送信でき、管理者は認証後に検索・詳細確認・削除・CSV出力・タグ管理を行えます。公開APIからもお問い合わせのCRUD操作が可能です。
+## 概要
 
-## 環境構築
+Laravel 10 を用いて構築したお問い合わせ管理アプリケーションです。一般ユーザーが公開フォームからお問い合わせを送信でき、管理者はログイン後に内容の確認・検索・削除・CSV エクスポート・タグ管理を行えます。公開 API からもお問い合わせの CRUD 操作が可能です。
 
-```bash
-git clone <repository-url>
-cd contact-form-app
-cp .env.example .env
-composer install
-./vendor/bin/sail up -d
-./vendor/bin/sail artisan key:generate
-./vendor/bin/sail artisan migrate --seed
-npm install
-npm run dev
-```
+主な実装機能：
 
-## URL
+- お問い合わせの送信・確認・保存
+- カテゴリ・タグによるお問い合わせ分類
+- 管理画面での一覧表示・検索・詳細確認・削除
+- CSV エクスポート
+- タグの作成・編集・削除
+- 管理画面への認証制御（Laravel Fortify）
+- 公開 REST API（お問い合わせ CRUD）
 
-- お問い合わせフォーム: `http://localhost`
-- 管理画面: `http://localhost/admin`
-- phpMyAdmin: `http://localhost:8080`
-- 公開API: `http://localhost/api/v1/contacts`
-
-初期管理者:
-
-```text
-email: test@example.com
-password: password
-```
-
-## テスト
-
-```bash
-./vendor/bin/sail artisan test
-./vendor/bin/sail artisan test --coverage
-```
-
-## ER図
+## ER 図
 
 ```mermaid
 erDiagram
@@ -89,19 +66,97 @@ erDiagram
         timestamp updated_at
     }
 
-    CATEGORIES ||--o{ CONTACTS : classifies
-    CONTACTS ||--o{ CONTACT_TAG : has
-    TAGS ||--o{ CONTACT_TAG : assigned
+    CATEGORIES ||--o{ CONTACTS : "1対多"
+    CONTACTS ||--o{ CONTACT_TAG : "1対多"
+    TAGS ||--o{ CONTACT_TAG : "1対多"
 ```
-
-`contact_tag` には `UNIQUE(contact_id, tag_id)` 制約があります。
 
 ## 使用技術
 
-- PHP 8.2
-- Laravel 10
-- MySQL 8.0
-- Laravel Fortify
-- Laravel Sail
-- Tailwind CSS
-- Vite
+| 技術 | バージョン |
+| --- | --- |
+| PHP | 8.2 |
+| Laravel | 10.x |
+| MySQL | 8.0 |
+| Nginx | Web サーバー |
+| Docker / Laravel Sail | 開発環境 |
+| Laravel Fortify | 認証 |
+| Tailwind CSS | スタイリング |
+| Vite | フロントエンドビルド |
+
+## 環境構築手順
+
+### 1. リポジトリをクローン
+
+```bash
+git clone <リポジトリURL>
+cd contact-form-app
+```
+
+### 2. 環境変数ファイルを作成
+
+```bash
+cp .env.example .env
+```
+
+### 3. Composer パッケージをインストール
+
+```bash
+composer install
+```
+
+### 4. Docker コンテナを起動
+
+```bash
+./vendor/bin/sail up -d
+```
+
+### 5. アプリケーションキーを生成
+
+```bash
+./vendor/bin/sail artisan key:generate
+```
+
+### 6. マイグレーションと初期データの投入
+
+```bash
+./vendor/bin/sail artisan migrate --seed
+```
+
+### 7. フロントエンドの依存関係をインストールしてビルド
+
+```bash
+npm install
+npm run dev
+```
+
+## API エンドポイント一覧
+
+ベース URL: `/api/v1`
+
+| メソッド | パス | 概要 |
+| --- | --- | --- |
+| GET | `/api/v1/contacts` | お問い合わせ一覧を取得（検索・ページネーション対応） |
+| GET | `/api/v1/contacts/{contact}` | 指定したお問い合わせの詳細を取得 |
+| POST | `/api/v1/contacts` | お問い合わせを新規登録 |
+| PUT | `/api/v1/contacts/{contact}` | 指定したお問い合わせを更新 |
+| DELETE | `/api/v1/contacts/{contact}` | 指定したお問い合わせを削除 |
+
+## 開発環境 URL
+
+| 種別 | URL |
+| --- | --- |
+| お問い合わせフォーム | http://localhost |
+| 管理画面 | http://localhost/admin |
+| phpMyAdmin | http://localhost:8080 |
+
+初期管理者アカウント：
+
+```text
+email: test@example.com
+password: password
+```
+
+## 作成者
+
+[名前]

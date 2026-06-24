@@ -43,7 +43,7 @@ class AdminControllerTest extends TestCase
                 'email' => "matched{$i}@example.com",
                 'gender' => 1,
                 'category_id' => $targetCategory->id,
-                'created_at' => $targetDate.' 10:00:00',
+                'created_at' => $targetDate . ' 10:00:00',
             ]);
         }
 
@@ -53,7 +53,7 @@ class AdminControllerTest extends TestCase
             'email' => 'unmatched-keyword@example.com',
             'gender' => 1,
             'category_id' => $targetCategory->id,
-            'created_at' => $targetDate.' 10:00:00',
+            'created_at' => $targetDate . ' 10:00:00',
         ]);
 
         Contact::factory()->create([
@@ -62,7 +62,7 @@ class AdminControllerTest extends TestCase
             'email' => 'unmatched-gender@example.com',
             'gender' => 2,
             'category_id' => $targetCategory->id,
-            'created_at' => $targetDate.' 10:00:00',
+            'created_at' => $targetDate . ' 10:00:00',
         ]);
 
         Contact::factory()->create([
@@ -71,7 +71,7 @@ class AdminControllerTest extends TestCase
             'email' => 'unmatched-category@example.com',
             'gender' => 1,
             'category_id' => $otherCategory->id,
-            'created_at' => $targetDate.' 10:00:00',
+            'created_at' => $targetDate . ' 10:00:00',
         ]);
 
         Contact::factory()->create([
@@ -84,7 +84,7 @@ class AdminControllerTest extends TestCase
         ]);
 
         // Act
-        $response = $this->get('/admin?'.http_build_query([
+        $response = $this->get('/admin?' . http_build_query([
             'keyword' => '山田',
             'gender' => 1,
             'category_id' => $targetCategory->id,
@@ -112,11 +112,11 @@ class AdminControllerTest extends TestCase
         $contact = Contact::factory()->create(['category_id' => $category->id]);
 
         // Act
-        $response = $this->get('/admin/contacts/'.$contact->id);
+        $response = $this->get('/admin/contacts/' . $contact->id);
 
         // Assert
         $response->assertOk();
-        $response->assertSee($category->name);
+        $response->assertSee($category->content);
     }
 
     // DELETE /admin/contacts/{contact} でレコードが正常に削除され、/admin にリダイレクトされる
@@ -126,7 +126,7 @@ class AdminControllerTest extends TestCase
         $contact = Contact::factory()->create();
 
         // Act
-        $response = $this->delete('/admin/contacts/'.$contact->id);
+        $response = $this->delete('/admin/contacts/' . $contact->id);
 
         // Assert
         $this->assertDatabaseMissing('contacts', ['id' => $contact->id]);

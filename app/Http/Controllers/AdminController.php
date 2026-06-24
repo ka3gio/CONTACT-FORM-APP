@@ -15,9 +15,9 @@ class AdminController extends Controller
 
         $query = Contact::query()->with(['category', 'tags']);
 
-        if (! empty($validated['keyword'])) {
+        if (!empty($validated['keyword'])) {
             $query->where(function ($query) use ($validated) {
-                $keyword = '%'.$validated['keyword'].'%';
+                $keyword = '%' . $validated['keyword'] . '%';
 
                 $query->where('last_name', 'like', $keyword)
                     ->orWhere('first_name', 'like', $keyword)
@@ -25,7 +25,7 @@ class AdminController extends Controller
             });
         }
 
-        if (isset($validated['gender'])) {
+        if (!empty($validated['gender'])) {
             $query->where('gender', $validated['gender']);
         }
 
@@ -33,7 +33,7 @@ class AdminController extends Controller
             $query->where('category_id', $validated['category_id']);
         }
 
-        if (! empty($validated['date'])) {
+        if (!empty($validated['date'])) {
             $query->whereDate('created_at', $validated['date']);
         }
 

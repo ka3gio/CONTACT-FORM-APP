@@ -50,9 +50,9 @@ class ContactController extends Controller
 
         $query = Contact::query()->with(['category', 'tags']);
 
-        if (! empty($validated['keyword'])) {
+        if (!empty($validated['keyword'])) {
             $query->where(function ($query) use ($validated) {
-                $keyword = '%'.$validated['keyword'].'%';
+                $keyword = '%' . $validated['keyword'] . '%';
 
                 $query->where('last_name', 'like', $keyword)
                     ->orWhere('first_name', 'like', $keyword)
@@ -60,7 +60,7 @@ class ContactController extends Controller
             });
         }
 
-        if (isset($validated['gender'])) {
+        if (!empty($validated['gender'])) {
             $query->where('gender', $validated['gender']);
         }
 
@@ -68,7 +68,7 @@ class ContactController extends Controller
             $query->where('category_id', $validated['category_id']);
         }
 
-        if (! empty($validated['date'])) {
+        if (!empty($validated['date'])) {
             $query->whereDate('created_at', $validated['date']);
         }
 
@@ -100,7 +100,7 @@ class ContactController extends Controller
             foreach ($query->cursor() as $contact) {
                 fputcsv($stream, [
                     $contact->id,
-                    $contact->last_name.' '.$contact->first_name,
+                    $contact->last_name . ' ' . $contact->first_name,
                     $contact->gender_label,
                     $contact->email,
                     $contact->tel,
