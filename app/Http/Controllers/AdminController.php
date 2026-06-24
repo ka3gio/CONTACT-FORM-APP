@@ -2,44 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests\IndexContactRequest;
-use App\Models\Contact;
 use App\Models\Category;
+use App\Models\Contact;
 use App\Models\Tag;
 
 class AdminController extends Controller
 {
     public function index(IndexContactRequest $request)
     {
+        $validated = $request->validated();
 
-        $query = Contact::query();
+        $query = Contact::query()->with(['category', 'tags']);
 
-        if ($request->filled("keyword")) {
-            $query->where(function ($query) use ($request) {
-                $keyword = "%" . $request->keyword . "%";
+        if (! empty($validated['keyword'])) {
+            $query->where(function ($query) use ($validated) {
+                $keyword = '%'.$validated['keyword'].'%';
 
-                $query->where("last_name", "like", $keyword)
-                    ->orWhere("first_name", "like", $keyword)
-                    ->orWhere("email", "like", $keyword);
+                $query->where('last_name', 'like', $keyword)
+                    ->orWhere('first_name', 'like', $keyword)
+                    ->orWhere('email', 'like', $keyword);
             });
         }
 
-        if ($request->gender != 0) {
-            $query->where("gender", $request->gender);
+        if (isset($validated['gender'])) {
+            $query->where('gender', $validated['gender']);
         }
 
-        if ($request->filled("category_id")) {
-            $query->where("category_id", $request->category_id);
+        if (isset($validated['category_id'])) {
+            $query->where('category_id', $validated['category_id']);
         }
 
-        if ($request->filled("date")) {
-            $query->whereDate("created_at", $request->date);
+        if (! empty($validated['date'])) {
+            $query->whereDate('created_at', $validated['date']);
         }
 
-        $query->orderBy("created_at", "desc");
+        $query->orderBy('created_at', 'desc');
 
-        $contacts = $query->with('tags')->paginate(7);
+        $contacts = $query->paginate(7);
         $categories = Category::all();
         $tags = Tag::all();
 
@@ -52,7 +52,6 @@ class AdminController extends Controller
 
         return view('admin.show', compact('contact'));
     }
-
 
     public function destroy($id)
     {

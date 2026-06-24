@@ -54,7 +54,9 @@ class AuthenticationTest extends TestCase
         ]);
 
         // Assert
-        $response->assertSessionHasErrors('email');
+        $response->assertSessionHasErrors([
+            'email' => 'ログイン情報が登録されていません',
+        ]);
         $this->assertGuest();
     }
 
@@ -68,7 +70,9 @@ class AuthenticationTest extends TestCase
         ]);
 
         // Assert
-        $response->assertSessionHasErrors('email');
+        $response->assertSessionHasErrors([
+            'email' => 'ログイン情報が登録されていません',
+        ]);
         $this->assertGuest();
     }
 
@@ -82,7 +86,9 @@ class AuthenticationTest extends TestCase
         ]);
 
         // Assert
-        $response->assertSessionHasErrors('email');
+        $response->assertSessionHasErrors([
+            'email' => 'メールアドレスを入力してください',
+        ]);
     }
 
     // ログイン時にパスワードは必須
@@ -98,7 +104,9 @@ class AuthenticationTest extends TestCase
         ]);
 
         // Assert
-        $response->assertSessionHasErrors('password');
+        $response->assertSessionHasErrors([
+            'password' => 'パスワードを入力してください',
+        ]);
     }
 
     // ログアウトできる

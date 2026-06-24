@@ -2,10 +2,11 @@
 
 namespace Tests\Unit;
 
-use App\Http\Requests\StoreContactRequest;
-use App\Http\Requests\IndexContactRequest;
-use App\Http\Requests\StoretagRequest;
 use App\Http\Requests\ExportContactRequest;
+use App\Http\Requests\IndexContactRequest;
+use App\Http\Requests\StoreContactRequest;
+use App\Http\Requests\StoretagRequest;
+use App\Http\Requests\UpdateTagRequest;
 use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,30 +16,33 @@ use Tests\TestCase;
 
 class ValidationTest extends TestCase
 {
-
     use RefreshDatabase;
 
     public function store_contact_validate(array $data)
     {
-        $request = new StoreContactRequest();
+        $request = new StoreContactRequest;
+
         return Validator::make($data, $request->rules());
     }
 
     public function index_contact_validate(array $data)
     {
-        $request = new IndexContactRequest();
+        $request = new IndexContactRequest;
+
         return Validator::make($data, $request->rules());
     }
 
     public function export_contact_validate(array $data)
     {
-        $request = new ExportContactRequest();
+        $request = new ExportContactRequest;
+
         return Validator::make($data, $request->rules());
     }
 
     private function store_tag_validate(array $data, ?Tag $tag = null)
     {
-        $request = StoreTagRequest::create(
+        $requestClass = $tag ? UpdateTagRequest::class : StoretagRequest::class;
+        $request = $requestClass::create(
             $tag ? "/admin/tags/{$tag->id}" : '/admin/tags',
             $tag ? 'PUT' : 'POST',
             $data
@@ -50,7 +54,7 @@ class ValidationTest extends TestCase
             $route->bind($request);
             $route->setParameter('tag', $tag->id);
 
-            $request->setRouteResolver(fn() => $route);
+            $request->setRouteResolver(fn () => $route);
         }
 
         return Validator::make($data, $request->rules());
@@ -100,6 +104,26 @@ class ValidationTest extends TestCase
         $validator = $this->store_contact_validate($data);
 
         $this->assertFalse($validator->passes());
+    }
+
+    // お問い合わせ内容が120文字を超える場合は拒否される
+    public function test_contact_detail_must_not_exceed_120_characters(): void
+    {
+        $category = Category::factory()->create();
+
+        $validator = $this->store_contact_validate([
+            'last_name' => '山田',
+            'first_name' => '太郎',
+            'gender' => 1,
+            'email' => 'test@example.com',
+            'tel' => '09012345678',
+            'address' => '東京都',
+            'category_id' => $category->id,
+            'detail' => str_repeat('あ', 121),
+        ]);
+
+        $this->assertFalse($validator->passes());
+        $this->assertArrayHasKey('detail', $validator->errors()->toArray());
     }
 
     // 正しいフィルタ条件を受け付ける

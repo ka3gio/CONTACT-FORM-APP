@@ -2,8 +2,9 @@
 
 namespace Tests\Unit;
 
-use App\Http\Requests\Api\IndexContactRequest;
-use App\Http\Requests\StoreContactRequest;
+use App\Http\Requests\Api\V1\IndexContactRequest;
+use App\Http\Requests\Api\V1\StoreContactRequest;
+use App\Http\Requests\Api\V1\UpdateContactRequest;
 use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,16 +17,16 @@ class ApiValidationTest extends TestCase
 
     private function index_contact_validate(array $data)
     {
-        $request = new IndexContactRequest();
+        $request = new IndexContactRequest;
 
-        return Validator::make($data, $request->rules());
+        return Validator::make($data, $request->rules(), $request->messages());
     }
 
     private function store_contact_validate(array $data)
     {
-        $request = new StoreContactRequest();
+        $request = new StoreContactRequest;
 
-        return Validator::make($data, $request->rules());
+        return Validator::make($data, $request->rules(), $request->messages());
     }
 
     // API検索でキーワード・性別・カテゴリ・日付・ページ・表示件数を受け付ける
@@ -149,5 +150,50 @@ class ApiValidationTest extends TestCase
 
             $this->assertTrue($validator->fails());
         }
+    }
+
+    // API作成で設計指定の日本語エラーメッセージを返す
+    public function test_api_store_validation_returns_required_japanese_messages(): void
+    {
+        $category = Category::factory()->create();
+        $request = new StoreContactRequest;
+        $validator = Validator::make([
+            'first_name' => '太郎',
+            'last_name' => '山田',
+            'gender' => 4,
+            'email' => 'test@example.com',
+            'tel' => 'invalid-tel',
+            'address' => '東京都',
+            'category_id' => 999,
+            'detail' => str_repeat('あ', 121),
+            'tag_ids' => [999],
+        ], $request->rules(), $request->messages());
+
+        $this->assertSame('性別の値が不正です', $validator->errors()->first('gender'));
+        $this->assertSame(
+            '電話番号はハイフンなしの10〜11桁で入力してください',
+            $validator->errors()->first('tel')
+        );
+        $this->assertSame(
+            '選択されたカテゴリーが存在しません',
+            $validator->errors()->first('category_id')
+        );
+        $this->assertSame(
+            '選択されたタグが存在しません',
+            $validator->errors()->first('tag_ids.0')
+        );
+        $this->assertSame(
+            'お問い合わせ内容は120文字以内で入力してください',
+            $validator->errors()->first('detail')
+        );
+    }
+
+    // API更新は更新専用Requestでも作成時と同じルールを使用する
+    public function test_api_update_request_uses_same_rules_as_store_request(): void
+    {
+        $storeRequest = new StoreContactRequest;
+        $updateRequest = new UpdateContactRequest;
+
+        $this->assertSame($storeRequest->rules(), $updateRequest->rules());
     }
 }

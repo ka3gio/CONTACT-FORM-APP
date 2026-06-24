@@ -2,18 +2,17 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Category;
 use App\Models\Contact;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AdminControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -21,7 +20,7 @@ class AdminControllerTest extends TestCase
         $this->actingAs($user);
     }
 
-    # GET /admin でキーワード・性別・カテゴリ・日付フィルタが機能し、結果が7件ごとにページネーションされる
+    // GET /admin でキーワード・性別・カテゴリ・日付フィルタが機能し、結果が7件ごとにページネーションされる
     public function test_admin_contact_index_filters_contacts_and_paginates_by_7_items(): void
     {
         // Arrange
@@ -44,7 +43,7 @@ class AdminControllerTest extends TestCase
                 'email' => "matched{$i}@example.com",
                 'gender' => 1,
                 'category_id' => $targetCategory->id,
-                'created_at' => $targetDate . ' 10:00:00',
+                'created_at' => $targetDate.' 10:00:00',
             ]);
         }
 
@@ -54,7 +53,7 @@ class AdminControllerTest extends TestCase
             'email' => 'unmatched-keyword@example.com',
             'gender' => 1,
             'category_id' => $targetCategory->id,
-            'created_at' => $targetDate . ' 10:00:00',
+            'created_at' => $targetDate.' 10:00:00',
         ]);
 
         Contact::factory()->create([
@@ -63,7 +62,7 @@ class AdminControllerTest extends TestCase
             'email' => 'unmatched-gender@example.com',
             'gender' => 2,
             'category_id' => $targetCategory->id,
-            'created_at' => $targetDate . ' 10:00:00',
+            'created_at' => $targetDate.' 10:00:00',
         ]);
 
         Contact::factory()->create([
@@ -72,7 +71,7 @@ class AdminControllerTest extends TestCase
             'email' => 'unmatched-category@example.com',
             'gender' => 1,
             'category_id' => $otherCategory->id,
-            'created_at' => $targetDate . ' 10:00:00',
+            'created_at' => $targetDate.' 10:00:00',
         ]);
 
         Contact::factory()->create([
@@ -85,7 +84,7 @@ class AdminControllerTest extends TestCase
         ]);
 
         // Act
-        $response = $this->get('/admin?' . http_build_query([
+        $response = $this->get('/admin?'.http_build_query([
             'keyword' => '山田',
             'gender' => 1,
             'category_id' => $targetCategory->id,
@@ -105,7 +104,7 @@ class AdminControllerTest extends TestCase
         $response->assertDontSee('unmatched-date@example.com');
     }
 
-    # GET /admin/contacts/{contact} で指定したお問い合わせがカテゴリ情報付きで詳細ページに表示される
+    // GET /admin/contacts/{contact} で指定したお問い合わせがカテゴリ情報付きで詳細ページに表示される
     public function test_admin_can_view_contact_detail_with_category(): void
     {
         // Arrange
@@ -113,23 +112,23 @@ class AdminControllerTest extends TestCase
         $contact = Contact::factory()->create(['category_id' => $category->id]);
 
         // Act
-        $response = $this->get('/admin/contacts/' . $contact->id);
+        $response = $this->get('/admin/contacts/'.$contact->id);
 
         // Assert
         $response->assertOk();
         $response->assertSee($category->name);
     }
 
-    # DELETE /admin/contacts/{contact} でレコードが正常に削除され、/admin にリダイレクトされる
+    // DELETE /admin/contacts/{contact} でレコードが正常に削除され、/admin にリダイレクトされる
     public function test_contact_is_deleted_and_is_redirects_to_admin_page(): void
     {
         // Arange
         $contact = Contact::factory()->create();
 
         // Act
-        $response = $this->delete('/admin/contacts/' . $contact->id);
+        $response = $this->delete('/admin/contacts/'.$contact->id);
 
-        //Assert
+        // Assert
         $this->assertDatabaseMissing('contacts', ['id' => $contact->id]);
         $this->assertDatabaseMissing('contact_tag', ['contact_id' => $contact->id]);
 

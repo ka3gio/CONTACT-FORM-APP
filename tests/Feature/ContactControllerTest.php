@@ -2,19 +2,18 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use App\Models\Category;
-use App\Models\Tag;
 use App\Models\Contact;
+use App\Models\Tag;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ContactControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    # POST /contacts/confirm でバリデーション通過時にお問い合わせフォーム確認ページが表示され、入力内容が画面に表示されること
+    // POST /contacts/confirm でバリデーション通過時にお問い合わせフォーム確認ページが表示され、入力内容が画面に表示されること
     public function test_contact_confirm_page_is_displayed_on_valid_input(): void
     {
 
@@ -46,11 +45,11 @@ class ContactControllerTest extends TestCase
         $response->assertSee($data['email']);
         $response->assertSee($data['tel']);
         $response->assertSee($data['address']);
-        $response->assertSee($category->name);
+        $response->assertSee($category->content);
         $response->assertSee($data['detail']);
     }
 
-    # POST /contacts/confirm でバリデーションエラー時にお問い合わせフォームページにリダイレクトされ、エラーメッセージが表示されること
+    // POST /contacts/confirm でバリデーションエラー時にお問い合わせフォームページにリダイレクトされ、エラーメッセージが表示されること
     public function test_contact_confirm_page_redirects_back_on_invalid_input(): void
     {
         // Arrange
@@ -77,7 +76,7 @@ class ContactControllerTest extends TestCase
         $response->assertSessionHasErrors(['tel']);
     }
 
-    # POST /contacts でバリデーション通過時にお問い合わせが保存され、サンクスページにリダイレクトされること
+    // POST /contacts でバリデーション通過時にお問い合わせが保存され、サンクスページにリダイレクトされること
     public function test_contact_is_saved_and_redirects_to_thanks_on_valid_input(): void
     {
         // Arrange
@@ -121,7 +120,7 @@ class ContactControllerTest extends TestCase
         $response->assertRedirect('/thanks');
     }
 
-    # POST /contacts でバリデーションエラー時にお問い合わせフォームページにリダイレクトされ、エラーメッセージが表示されること
+    // POST /contacts でバリデーションエラー時にお問い合わせフォームページにリダイレクトされ、エラーメッセージが表示されること
     public function test_contact_redirects_back_on_invalid_input(): void
     {
         // Arrange
@@ -151,7 +150,7 @@ class ContactControllerTest extends TestCase
         ]);
     }
 
-    # ログイン済み管理者がフィルタ条件付きでCSVをDLできる
+    // ログイン済み管理者がフィルタ条件付きでCSVをDLできる
     public function test_authenticated_user_can_download_csv_with_filter_conditions(): void
     {
         // Arrange
@@ -173,7 +172,7 @@ class ContactControllerTest extends TestCase
             'gender' => 1,
             'email' => 'matched@example.com',
             'category_id' => $targetCategory->id,
-            'created_at' => $targetDate . ' 10:00:00',
+            'created_at' => $targetDate.' 10:00:00',
         ]);
 
         Contact::factory()->create([
@@ -182,7 +181,7 @@ class ContactControllerTest extends TestCase
             'gender' => 1,
             'email' => 'unmatched-keyword@example.com',
             'category_id' => $targetCategory->id,
-            'created_at' => $targetDate . ' 10:00:00',
+            'created_at' => $targetDate.' 10:00:00',
         ]);
 
         Contact::factory()->create([
@@ -191,7 +190,7 @@ class ContactControllerTest extends TestCase
             'gender' => 2,
             'email' => 'unmatched-gender@example.com',
             'category_id' => $targetCategory->id,
-            'created_at' => $targetDate . ' 10:00:00',
+            'created_at' => $targetDate.' 10:00:00',
         ]);
 
         Contact::factory()->create([
@@ -200,7 +199,7 @@ class ContactControllerTest extends TestCase
             'gender' => 1,
             'email' => 'unmatched-category@example.com',
             'category_id' => $otherCategory->id,
-            'created_at' => $targetDate . ' 10:00:00',
+            'created_at' => $targetDate.' 10:00:00',
         ]);
 
         Contact::factory()->create([
@@ -213,7 +212,7 @@ class ContactControllerTest extends TestCase
         ]);
 
         // Act
-        $response = $this->actingAs($user)->get('/contacts/export?' . http_build_query([
+        $response = $this->actingAs($user)->get('/contacts/export?'.http_build_query([
             'keyword' => '山田',
             'gender' => 1,
             'category_id' => $targetCategory->id,
@@ -233,7 +232,7 @@ class ContactControllerTest extends TestCase
         $this->assertStringNotContainsString('unmatched-date@example.com', $csv);
     }
 
-    # CSVをDLにおいて条件無指定時は新着順で全件出力される
+    // CSVをDLにおいて条件無指定時は新着順で全件出力される
     public function test_authenticated_user_can_download_csv_without_conditions_ordered_by_latest(): void
     {
         // Arrange

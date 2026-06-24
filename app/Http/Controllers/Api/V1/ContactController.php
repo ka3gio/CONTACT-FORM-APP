@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\IndexContactRequest;
+use App\Http\Requests\Api\V1\StoreContactRequest;
+use App\Http\Requests\Api\V1\UpdateContactRequest;
 use App\Http\Resources\ContactResource;
-use App\Http\Requests\Api\IndexContactRequest;
-use App\Http\Requests\StoreContactRequest;
 use App\Models\Contact;
 
 class ContactController extends Controller
@@ -19,32 +20,32 @@ class ContactController extends Controller
 
         $query = Contact::query()->with(['category', 'tags']);
 
-        if (!empty($validated["keyword"])) {
+        if (! empty($validated['keyword'])) {
             $query->where(function ($query) use ($validated) {
-                $keyword = "%" . $validated["keyword"] . "%";
+                $keyword = '%'.$validated['keyword'].'%';
 
-                $query->where("last_name", "like", $keyword)
-                    ->orWhere("first_name", "like", $keyword)
-                    ->orWhere("email", "like", $keyword);
+                $query->where('last_name', 'like', $keyword)
+                    ->orWhere('first_name', 'like', $keyword)
+                    ->orWhere('email', 'like', $keyword);
             });
         }
 
-        if (isset($validated["gender"])) {
-            $query->where("gender", $validated["gender"]);
+        if (isset($validated['gender'])) {
+            $query->where('gender', $validated['gender']);
         }
 
-        if (isset($validated["category_id"])) {
-            $query->where("category_id", $validated["category_id"]);
+        if (isset($validated['category_id'])) {
+            $query->where('category_id', $validated['category_id']);
         }
 
-        if (!empty($validated["date"])) {
-            $query->whereDate("created_at", $validated["date"]);
+        if (! empty($validated['date'])) {
+            $query->whereDate('created_at', $validated['date']);
         }
 
-        $query->orderBy("created_at", "desc");
+        $query->orderBy('created_at', 'desc');
 
-        $perPage = $validated["per_page"] ?? 20;
-        $page = $validated["page"] ?? 1;
+        $perPage = $validated['per_page'] ?? 20;
+        $page = $validated['page'] ?? 1;
 
         $contacts = $query->paginate($perPage, ['*'], 'page', $page);
 
@@ -77,9 +78,9 @@ class ContactController extends Controller
     {
         $contact = Contact::find($id);
 
-        if (!$contact) {
+        if (! $contact) {
             return response()->json([
-                'error' => 'お問い合わせが見つかりませんでした。'
+                'error' => 'お問い合わせが見つかりませんでした。',
             ], 404);
         }
 
@@ -91,13 +92,13 @@ class ContactController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreContactRequest $request, string $id)
+    public function update(UpdateContactRequest $request, string $id)
     {
         $contact = Contact::find($id);
 
-        if (!$contact) {
+        if (! $contact) {
             return response()->json([
-                'error' => 'お問い合わせが見つかりませんでした。'
+                'error' => 'お問い合わせが見つかりませんでした。',
             ], 404);
         }
 
@@ -118,9 +119,9 @@ class ContactController extends Controller
     {
         $contact = Contact::find($id);
 
-        if (!$contact) {
+        if (! $contact) {
             return response()->json([
-                'error' => 'お問い合わせが見つかりませんでした。'
+                'error' => 'お問い合わせが見つかりませんでした。',
             ], 404);
         }
 
