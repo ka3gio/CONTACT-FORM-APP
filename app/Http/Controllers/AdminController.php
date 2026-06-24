@@ -16,9 +16,13 @@ class AdminController extends Controller
         $query = Contact::query();
 
         if ($request->filled("keyword")) {
-            $query->where("last_name", "like", "%" . $request->keyword . "%")
-                ->orWhere("first_name", "like", "%" . $request->keyword . "%")
-                ->orWhere("email", "like", "%" . $request->keyword . "%");
+            $query->where(function ($query) use ($request) {
+                $keyword = "%" . $request->keyword . "%";
+
+                $query->where("last_name", "like", $keyword)
+                    ->orWhere("first_name", "like", $keyword)
+                    ->orWhere("email", "like", $keyword);
+            });
         }
 
         if ($request->gender != 0) {

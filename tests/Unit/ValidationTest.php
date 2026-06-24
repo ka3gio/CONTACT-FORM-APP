@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Http\Requests\StoreContactRequest;
 use App\Http\Requests\IndexContactRequest;
 use App\Http\Requests\StoretagRequest;
+use App\Http\Requests\ExportContactRequest;
 use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,6 +27,12 @@ class ValidationTest extends TestCase
     public function index_contact_validate(array $data)
     {
         $request = new IndexContactRequest();
+        return Validator::make($data, $request->rules());
+    }
+
+    public function export_contact_validate(array $data)
+    {
+        $request = new ExportContactRequest();
         return Validator::make($data, $request->rules());
     }
 
@@ -142,6 +149,57 @@ class ValidationTest extends TestCase
         ];
 
         $validator = $this->index_contact_validate($invalidData);
+
+        $this->assertFalse($validator->passes());
+    }
+
+    // 正しいフィルタ条件を受け付ける
+    public function test_valid_filter_conditions_are_accepted_on_export_csv(): void
+    {
+        $category = Category::factory()->create();
+
+        // 正しい条件
+        $validData = [
+            'keyword' => '山田',
+            'gender' => 1,
+            'category_id' => $category->id,
+            'date' => '2026-06-23',
+        ];
+
+        $validator = $this->export_contact_validate($validData);
+
+        $this->assertTrue($validator->passes());
+    }
+
+    // 不正な性別を拒否する
+    public function test_invalid_gender_is_rejected_on_export_csv(): void
+    {
+        $category = Category::factory()->create();
+
+        // 無効な性別
+        $invalidData = [
+            'keyword' => '山田',
+            'gender' => 'invalid', // 無効な性別
+            'category_id' => $category->id,
+            'date' => '2026-06-23',
+        ];
+
+        $validator = $this->export_contact_validate($invalidData);
+
+        $this->assertFalse($validator->passes());
+    }
+
+    // 存在しないカテゴリIDを拒否する
+    public function test_invalid_category_id_is_rejected_on_export_csv(): void
+    {
+        $invalidData = [
+            'keyword' => '山田',
+            'gender' => 1,
+            'category_id' => 999, // 無効なカテゴリID
+            'date' => '2026-06-23',
+        ];
+
+        $validator = $this->export_contact_validate($invalidData);
 
         $this->assertFalse($validator->passes());
     }
