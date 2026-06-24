@@ -30,7 +30,7 @@ class ContactControllerTest extends TestCase
             'address' => '東京都',
             'category_id' => $category->id,
             'detail' => 'お問い合わせ内容です。',
-            'tags' => $tags->pluck('id')->toArray(),
+            'tag_ids' => $tags->pluck('id')->toArray(),
         ];
 
         // Act
