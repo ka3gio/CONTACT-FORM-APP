@@ -99,7 +99,7 @@ class ApiContactControllerTest extends TestCase
             'created_at' => '2026-06-24 10:00:00',
         ]);
 
-        $response = $this->getJson('/api/v1/contacts?' . http_build_query([
+        $response = $this->getJson('/api/v1/contacts?'.http_build_query([
             'keyword' => '山田',
             'gender' => 1,
             'category_id' => $targetCategory->id,
@@ -124,8 +124,9 @@ class ApiContactControllerTest extends TestCase
     // GET /api/v1/contacts で不正な検索条件を指定すると422が返る
     public function test_api_contact_list_returns_422_for_invalid_filters(): void
     {
-        $response = $this->getJson('/api/v1/contacts?' . http_build_query([
+        $response = $this->getJson('/api/v1/contacts?'.http_build_query([
             'gender' => 4,
+            'category_id' => 999,
             'page' => 0,
             'per_page' => 101,
         ]));
@@ -133,9 +134,15 @@ class ApiContactControllerTest extends TestCase
         $response->assertUnprocessable()
             ->assertJsonValidationErrors([
                 'gender',
+                'category_id',
                 'page',
                 'per_page',
-            ]);
+            ])
+            ->assertJsonPath('errors.gender.0', '性別の値が不正です')
+            ->assertJsonPath(
+                'errors.category_id.0',
+                '選択されたカテゴリーが存在しません'
+            );
     }
 
     // GET /api/v1/contacts/{id} でJSON形式のお問い合わせ詳細を取得できる
@@ -162,9 +169,7 @@ class ApiContactControllerTest extends TestCase
         $response = $this->getJson('/api/v1/contacts/999');
 
         $response->assertNotFound()
-            ->assertJsonStructure([
-                'error',
-            ]);
+            ->assertJsonPath('error', 'お問い合わせが見つかりませんでした。');
     }
 
     // POST /api/v1/contacts でお問い合わせを作成して201が返る
@@ -215,6 +220,42 @@ class ApiContactControllerTest extends TestCase
             ]);
     }
 
+    // POST /api/v1/contacts で不正値を指定すると設計指定の日本語エラーが返る
+    public function test_api_contact_create_returns_required_japanese_messages(): void
+    {
+        $response = $this->postJson('/api/v1/contacts', [
+            'first_name' => '太郎',
+            'last_name' => '山田',
+            'gender' => 4,
+            'email' => 'test@example.com',
+            'tel' => 'invalid-tel',
+            'address' => '東京都',
+            'category_id' => 999,
+            'detail' => str_repeat('あ', 121),
+            'tag_ids' => [999],
+        ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonPath('errors.gender.0', '性別の値が不正です')
+            ->assertJsonPath(
+                'errors.tel.0',
+                '電話番号はハイフンなしの10〜11桁で入力してください'
+            )
+            ->assertJsonPath(
+                'errors.category_id.0',
+                '選択されたカテゴリーが存在しません'
+            )
+            ->assertJsonPath(
+                'errors.detail.0',
+                'お問い合わせ内容は120文字以内で入力してください'
+            );
+
+        $this->assertSame(
+            '選択されたタグが存在しません',
+            $response->json('errors')['tag_ids.0'][0]
+        );
+    }
+
     // PUT /api/v1/contacts/{id} でお問い合わせを更新して200が返る
     public function test_api_can_update_contact(): void
     {
@@ -259,9 +300,7 @@ class ApiContactControllerTest extends TestCase
         );
 
         $response->assertNotFound()
-            ->assertJsonStructure([
-                'error',
-            ]);
+            ->assertJsonPath('error', 'お問い合わせが見つかりませんでした。');
     }
 
     // PUT /api/v1/contacts/{id} で不正な入力値を指定すると422が返る
@@ -303,8 +342,6 @@ class ApiContactControllerTest extends TestCase
         $response = $this->deleteJson('/api/v1/contacts/999');
 
         $response->assertNotFound()
-            ->assertJsonStructure([
-                'error',
-            ]);
+            ->assertJsonPath('error', 'お問い合わせが見つかりませんでした。');
     }
 }

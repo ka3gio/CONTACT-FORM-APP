@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests\StoreTagRequest;
+use App\Http\Requests\UpdateTagRequest;
 use App\Models\Tag;
 
 class TagController extends Controller
@@ -32,7 +32,7 @@ class TagController extends Controller
         $validated = $request->validated();
         Tag::create($validated);
 
-        return redirect("/admin");
+        return redirect('/admin');
     }
 
     /**
@@ -49,17 +49,19 @@ class TagController extends Controller
     public function edit(string $id)
     {
         $tag = Tag::findOrFail($id);
-        return view("admin.tags.edit", compact("tag"));
+
+        return view('admin.tags.edit', compact('tag'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreTagRequest $request, string $id)
+    public function update(UpdateTagRequest $request, string $id)
     {
         $validated = $request->validated();
         Tag::findOrFail($id)->update($validated);
-        return redirect("/admin");
+
+        return redirect('/admin');
     }
 
     /**
@@ -69,6 +71,7 @@ class TagController extends Controller
     {
         $tag = Tag::findOrFail($id);
         $tag->delete();
-        return redirect("/admin");
+
+        return redirect('/admin');
     }
 }

@@ -2,17 +2,17 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use App\Models\Category;
 use App\Models\Tag;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class PageAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    # / にアクセスした際、正常に表示され、カテゴリとタグが表示されること
+    // / にアクセスした際、正常に表示され、カテゴリとタグが表示されること
     public function test_contact_page_is_accessible(): void
     {
         // Arrange
@@ -48,7 +48,7 @@ class PageAccessTest extends TestCase
     public function test_admin_page_is_accessible_on_login(): void
     {
         // Arrange
-        $user = \App\Models\User::factory()->create();
+        $user = User::factory()->create();
 
         // Act
         $response = $this->actingAs($user)->get('/admin');

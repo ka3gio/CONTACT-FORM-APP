@@ -1,20 +1,20 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Unit;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
+// use PHPUnit\Framework\TestCase;
 use App\Models\Category;
 use App\Models\Contact;
 use App\Models\Tag;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ContactModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    # コンタクトのレコードを作成できること
+    // コンタクトのレコードを作成できること
     public function test_can_create_contact(): void
     {
         $contact = Contact::factory()->create();
@@ -24,7 +24,7 @@ class ContactModelTest extends TestCase
         ]);
     }
 
-    # ユーザーのレコードを作成できること
+    // ユーザーのレコードを作成できること
     public function test_can_create_user(): void
     {
         $user = User::factory()->create();
@@ -34,7 +34,7 @@ class ContactModelTest extends TestCase
         ]);
     }
 
-    # 1つのカテゴリから、紐づく複数のお問い合わせが正しく取得できる
+    // 1つのカテゴリから、紐づく複数のお問い合わせが正しく取得できる
     public function test_category_has_many_contacts(): void
     {
         $category = Category::factory()->create();
@@ -43,7 +43,7 @@ class ContactModelTest extends TestCase
         $this->assertCount(3, $category->contacts);
     }
 
-    # お問い合わせから、紐づくカテゴリが正しく取得できる
+    // お問い合わせから、紐づくカテゴリが正しく取得できる
     public function test_contact_belongs_to_category(): void
     {
         $category = Category::factory()->create();
@@ -59,7 +59,7 @@ class ContactModelTest extends TestCase
         $this->assertEquals($category->id, $contact->category->id);
     }
 
-    # お問い合わせから、紐づく複数のタグが正しく同期できる
+    // お問い合わせから、紐づく複数のタグが正しく同期できる
     public function test_contact_can_sync_tags(): void
     {
         $contact = Contact::factory()->create();
@@ -70,7 +70,7 @@ class ContactModelTest extends TestCase
         $this->assertCount(3, $contact->tags);
     }
 
-    # タグから、紐づく複数のお問い合わせが正しく取得できる
+    // タグから、紐づく複数のお問い合わせが正しく取得できる
     public function test_tag_belongs_to_many_contacts(): void
     {
         $tag = Tag::factory()->create();
@@ -81,5 +81,4 @@ class ContactModelTest extends TestCase
         $this->assertCount(3, $tag->contacts);
         $this->assertEquals($contacts->pluck('id')->toArray(), $tag->contacts->pluck('id')->toArray());
     }
-
 }

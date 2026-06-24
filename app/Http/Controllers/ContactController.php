@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Http\Requests\StoreContactRequest;
 use App\Http\Requests\ExportContactRequest;
-use App\Models\Contact;
+use App\Http\Requests\StoreContactRequest;
 use App\Models\Category;
+use App\Models\Contact;
 use App\Models\Tag;
 
 class ContactController extends Controller
@@ -15,6 +14,7 @@ class ContactController extends Controller
     {
         $categories = Category::all();
         $tags = Tag::all();
+
         return view('contact.index', compact('categories', 'tags'));
     }
 
@@ -35,40 +35,44 @@ class ContactController extends Controller
     public function store(StoreContactRequest $request)
     {
         $validated = $request->validated();
-        $contact = Contact::create($validated);
+        $tagIds = $validated['tag_ids'] ?? [];
+        unset($validated['tag_ids']);
 
-        $contact->tags()->attach($validated['tag_ids'] ?? []);
+        $contact = Contact::create($validated);
+        $contact->tags()->attach($tagIds);
 
         return redirect('/thanks');
     }
 
     public function export(ExportContactRequest $request)
     {
-        $query = Contact::query();
+        $validated = $request->validated();
 
-        if ($request->filled("keyword")) {
-            $query->where(function ($query) use ($request) {
-                $keyword = "%" . $request->keyword . "%";
+        $query = Contact::query()->with(['category', 'tags']);
 
-                $query->where("last_name", "like", $keyword)
-                    ->orWhere("first_name", "like", $keyword)
-                    ->orWhere("email", "like", $keyword);
+        if (! empty($validated['keyword'])) {
+            $query->where(function ($query) use ($validated) {
+                $keyword = '%'.$validated['keyword'].'%';
+
+                $query->where('last_name', 'like', $keyword)
+                    ->orWhere('first_name', 'like', $keyword)
+                    ->orWhere('email', 'like', $keyword);
             });
         }
 
-        if ($request->gender != 0) {
-            $query->where("gender", $request->gender);
+        if (isset($validated['gender'])) {
+            $query->where('gender', $validated['gender']);
         }
 
-        if ($request->filled("category_id")) {
-            $query->where("category_id", $request->category_id);
+        if (isset($validated['category_id'])) {
+            $query->where('category_id', $validated['category_id']);
         }
 
-        if ($request->filled("date")) {
-            $query->whereDate("created_at", $request->date);
+        if (! empty($validated['date'])) {
+            $query->whereDate('created_at', $validated['date']);
         }
 
-        $query->orderBy("created_at", "desc");
+        $query->orderBy('created_at', 'desc');
 
         $fileName = 'contacts.csv';
 
@@ -96,7 +100,7 @@ class ContactController extends Controller
             foreach ($query->cursor() as $contact) {
                 fputcsv($stream, [
                     $contact->id,
-                    $contact->last_name . ' ' . $contact->first_name,
+                    $contact->last_name.' '.$contact->first_name,
                     $contact->gender_label,
                     $contact->email,
                     $contact->tel,

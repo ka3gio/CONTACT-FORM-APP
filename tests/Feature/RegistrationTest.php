@@ -52,7 +52,9 @@ class RegistrationTest extends TestCase
         ]);
 
         // Assert
-        $response->assertSessionHasErrors('name');
+        $response->assertSessionHasErrors([
+            'name' => 'お名前を入力してください',
+        ]);
     }
 
     // メールアドレスが空だとバリデーションエラーになる
@@ -67,7 +69,9 @@ class RegistrationTest extends TestCase
         ]);
 
         // Assert
-        $response->assertSessionHasErrors('email');
+        $response->assertSessionHasErrors([
+            'email' => 'メールアドレスを入力してください',
+        ]);
     }
 
     // 無効なメールアドレス形式だとバリデーションエラーになる
@@ -82,7 +86,9 @@ class RegistrationTest extends TestCase
         ]);
 
         // Assert
-        $response->assertSessionHasErrors('email');
+        $response->assertSessionHasErrors([
+            'email' => 'メールアドレスはメール形式で入力してください',
+        ]);
     }
 
     // 既に登録済みのメールアドレスだとバリデーションエラーになる
@@ -103,6 +109,21 @@ class RegistrationTest extends TestCase
         $response->assertSessionHasErrors('email');
     }
 
+    // パスワードが空だとバリデーションエラーになる
+    public function test_password_is_required(): void
+    {
+        $response = $this->post(route('register'), [
+            'name' => 'テストユーザー',
+            'email' => 'test@example.com',
+            'password' => '',
+            'password_confirmation' => '',
+        ]);
+
+        $response->assertSessionHasErrors([
+            'password' => 'パスワードを入力してください',
+        ]);
+    }
+
     // パスワードが8文字未満だとバリデーションエラーになる
     public function test_password_must_be_at_least_8_characters(): void
     {
@@ -115,7 +136,9 @@ class RegistrationTest extends TestCase
         ]);
 
         // Assert
-        $response->assertSessionHasErrors('password');
+        $response->assertSessionHasErrors([
+            'password' => 'パスワードは8文字以上で入力してください',
+        ]);
     }
 
     // パスワード確認が一致しないとバリデーションエラーになる
@@ -130,6 +153,8 @@ class RegistrationTest extends TestCase
         ]);
 
         // Assert
-        $response->assertSessionHasErrors('password');
+        $response->assertSessionHasErrors([
+            'password' => 'パスワードと一致しません',
+        ]);
     }
 }
